@@ -1,0 +1,182 @@
+* {
+  box-sizing: border-box;
+  font-family: 'Inter', 'Poppins', 'Segoe UI', sans-serif;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0b1220, #111827);
+  color: #e5e7eb;
+}
+
+/* TOPO */
+.topo {
+  background: linear-gradient(135deg, #0f172a, #020617);
+  padding: 22px 30px;
+  border-bottom: 1px solid #1e293b;
+}
+
+.logo h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: #f8fafc;
+}
+
+.logo span {
+  font-size: 14px;
+  color: #94a3b8;
+}
+
+/* CONTAINER */
+.container {
+  max-width: 1200px;
+  margin: auto;
+  padding: 40px 30px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+}
+
+/* CARDS */
+.card {
+  background: linear-gradient(145deg, #020617, #020617);
+  border-radius: 20px;
+  padding: 28px;
+  border: 1px solid #1e293b;
+  box-shadow: 0 18px 40px rgba(0,0,0,0.45);
+}
+
+.card h2 {
+  margin-top: 0;
+  font-size: 18px;
+  color: #93c5fd;
+  border-left: 4px solid #7c2d12;
+  padding-left: 10px;
+}
+
+/* FORM */
+label {
+  margin-top: 16px;
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: #cbd5f5;
+}
+
+input, select, textarea {
+  width: 100%;
+  margin-top: 6px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid #1e293b;
+  background: #020617;
+  color: #e5e7eb;
+  font-size: 14px;
+  transition: 0.25s;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #64748b;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+  background: #020617;
+  box-shadow: 0 0 0 2px rgba(37,99,235,0.25);
+}
+
+/* BOTÕES */
+.botoes {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+button {
+  flex: 1;
+  border: none;
+  padding: 13px;
+  border-radius: 14px;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.25s;
+}
+
+button:hover {
+  transform: translateY(-1px);
+}
+
+/* VOZ */
+button.voz {
+  background: linear-gradient(135deg, #1e3a8a, #2563eb);
+  color: #f8fafc;
+}
+
+/* SALVAR */
+button:not(.voz):not(.sec) {
+  background: linear-gradient(135deg, #7c2d12, #991b1b);
+  color: #f8fafc;
+}
+
+/* SECUNDÁRIO */
+button.sec {
+  background: #020617;
+  border: 1px solid #1e293b;
+  color: #cbd5f5;
+}
+
+/* REGISTROS */
+.item {
+  background: linear-gradient(145deg, #020617, #020617);
+  border-left: 5px solid #7c2d12;
+  padding: 16px;
+  border-radius: 14px;
+  margin-bottom: 12px;
+}
+
+.item strong {
+  color: #93c5fd;
+}
+
+.item small {
+  color: #94a3b8;
+}
+
+/* BOTÕES ITEM */
+.item button {
+  margin-top: 10px;
+  margin-right: 6px;
+  padding: 7px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  background: #020617;
+  border: 1px solid #1e293b;
+  color: #e5e7eb;
+}
+
+.item button:hover {
+  background: #1e293b;
+}
+
+/* RODAPÉ */
+.rodape {
+  text-align: center;
+  padding: 20px;
+  font-size: 13px;
+  color: #64748b;
+}
+
+/* RESPONSIVO */
+@media (max-width: 900px) {
+  .container {
+    grid-template-columns: 1fr;
+    padding: 20px;
+  }
+}

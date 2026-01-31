@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Gilberto Auto Peças | Registro de Manutenção</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="../styles/style.css">
+  <script src="../scripts/script.js" defer></script>
+</head>
+<body>
+
+<header class="topo">
+  <div class="logo">
+    <h1>InfoCar</h1>
+    <span>Sistema de Registro de Manutenção</span>
+  </div>
+</header>
+
+<main class="container">
+
+  <section class="card">
+    <h2>Registro de Reparo</h2>
+
+    <!-- ===== STATUS DA VOZ ===== -->
+    <div class="status-voz">
+      <img src="../assets/robo.png" id="iconeRobo" alt="Robô falando" hidden>
+      <img src="../assets/microfone.png" id="iconeMic" alt="Microfone ouvindo" hidden>
+    </div>
+
+    <button id="iniciarVoz" class="voz-principal">
+      Iniciar atendimento por voz
+    </button>
+
+    <label>Responsável</label>
+    <input type="text" id="nome" placeholder="Digite ou use a voz">
+
+    <label>Placa do veículo</label>
+    <input type="text" id="placa" placeholder="Ex: ABC-1234">
+
+    <label>Tipo de reparo</label>
+    <select id="reparo">
+      <option value="">Selecione</option>
+      <option>Troca de óleo</option>
+      <option>Freio</option>
+      <option>Suspensão</option>
+      <option>Elétrica</option>
+      <option>Motor</option>
+      <option>Alinhamento e balanceamento</option>
+      <option>Outro</option>
+    </select>
+
+    <label>Observações</label>
+    <textarea id="observacoes" placeholder="Detalhes adicionais"></textarea>
+
+    <div class="botoes">
+      <button id="salvar">Salvar</button>
+      <button class="sec" id="limparForm">Limpar Formulário</button>
+      <button class="sec" id="exportarExcel">Exportar para Excel</button>
+
+    </div>
+
+  </section>
+
+  <section class="card">
+    <h2>Registros</h2>
+    <div id="lista"></div>
+  </section>
+
+</main>
+
+<footer class="rodape">
+  © 2026 InfoCar — Sistema Demonstrativo — Talita Cordeiro Teixeira
+</footer>
+
+</body>
+</html>

@@ -17,6 +17,7 @@ body {
   border-bottom: 1px solid #1e293b;
 }
 
+
 .logo h1 {
   margin: 0;
   font-size: 24px;
@@ -54,6 +55,21 @@ body {
   color: #93c5fd;
   border-left: 4px solid #7c2d12;
   padding-left: 10px;
+}
+
+/* ===== STATUS VOZ ===== */
+.status-voz {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 70px;
+  margin-bottom: 14px;
+}
+
+.status-voz img {
+  height: 50px;      /* Tamanho padrão das imagens */
+  width: auto;
+  animation: pulse 1.4s infinite;
 }
 
 /* FORM */
@@ -180,3 +196,4 @@ button.sec {
     padding: 20px;
   }
 }
+

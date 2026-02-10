@@ -17,7 +17,6 @@ body {
   border-bottom: 1px solid #1e293b;
 }
 
-
 .logo h1 {
   margin: 0;
   font-size: 24px;
@@ -67,9 +66,16 @@ body {
 }
 
 .status-voz img {
-  height: 50px;      /* Tamanho padrão das imagens */
+  height: 50px;
   width: auto;
   animation: pulse 1.4s infinite;
+}
+
+/* ANIMAÇÃO PULSE */
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
 }
 
 /* FORM */
@@ -91,9 +97,16 @@ input, select, textarea {
   color: #e5e7eb;
   font-size: 14px;
   transition: 0.25s;
+  resize: vertical; /* Permite redimensionar textareas só na vertical */
+  min-height: 80px; /* Altura mínima para textareas */
+}
+
+textarea {
+  height: 100px; /* Altura padrão para textareas */
 }
 
 input::placeholder,
+select::placeholder,
 textarea::placeholder {
   color: #64748b;
 }
@@ -130,13 +143,14 @@ button:hover {
 }
 
 /* VOZ */
-button.voz {
+button.voz-principal {
   background: linear-gradient(135deg, #1e3a8a, #2563eb);
   color: #f8fafc;
+  margin-bottom: 20px;
 }
 
 /* SALVAR */
-button:not(.voz):not(.sec) {
+button:not(.sec):not(.voz-principal) {
   background: linear-gradient(135deg, #7c2d12, #991b1b);
   color: #f8fafc;
 }
@@ -149,6 +163,15 @@ button.sec {
 }
 
 /* REGISTROS */
+#lista:empty::before {
+  content: "Nenhum registro encontrado.";
+  text-align: center;
+  color: #64748b;
+  font-style: italic;
+  display: block;
+  padding: 40px;
+}
+
 .item {
   background: linear-gradient(145deg, #020617, #020617);
   border-left: 5px solid #7c2d12;
@@ -159,10 +182,13 @@ button.sec {
 
 .item strong {
   color: #93c5fd;
+  display: block;
+  margin-bottom: 4px;
 }
 
 .item small {
   color: #94a3b8;
+  display: block;
 }
 
 /* BOTÕES ITEM */
@@ -175,6 +201,8 @@ button.sec {
   background: #020617;
   border: 1px solid #1e293b;
   color: #e5e7eb;
+  flex: none;
+  min-width: auto;
 }
 
 .item button:hover {
@@ -194,6 +222,20 @@ button.sec {
   .container {
     grid-template-columns: 1fr;
     padding: 20px;
+    gap: 20px;
+  }
+  
+  .card {
+    padding: 20px;
+  }
+  
+  textarea {
+    height: 90px;
   }
 }
 
+@media (max-width: 480px) {
+  .botoes {
+    flex-direction: column;
+  }
+}

@@ -217,6 +217,11 @@ function renderizar() {
   const dados = JSON.parse(localStorage.getItem("registros")) || [];
   dados.reverse(); // Mais recentes primeiro
 
+  if (!dados.length) {
+    lista.innerHTML = '<div style="text-align:center;padding:2rem;color:#64748b;">Nenhum registro ainda. Clique em 🎤 para começar!</div>';
+    return;
+  }
+
   dados.forEach(r => {
     const div = document.createElement("div");
     div.className = "item";
@@ -273,11 +278,21 @@ btnExportar.onclick = () => {
   const dados = JSON.parse(localStorage.getItem("registros")) || [];
   if (!dados.length) return alert("Sem registros!");
 
-  let csv = "\uFEFFResponsável;Placa;Tipo de Reparo;Observações;Descrição do Processo;Data\r\n";
+  const cabecalho = ["Responsável", "Placa", "Tipo de Reparo", "Observações", "Descrição do Processo", "Data"];
+  let csvLinhas = [cabecalho.join(";")];
 
   dados.forEach(r => {
-    csv += `"${r.nome.replace(/"/g,'""')}";"${r.placa}";"${r.reparo.replace(/"/g,'""')}";"${(r.obs||'').replace(/"/g,'""')}";"${(r.descricaoProcesso||'').replace(/"/g,'""')}";"${r.data}"\r\n`;
+    csvLinhas.push([
+      `"${r.nome.replace(/"/g, '""')}"`,
+      `"${r.placa}"`,
+      `"${r.reparo.replace(/"/g, '""')}"`,
+      `"${(r.obs || '').replace(/"/g, '""')}"`,
+      `"${(r.descricaoProcesso || '').replace(/"/g, '""')}"`,
+      `"${r.data}"`
+    ].join(";"));
   });
+
+  const csv = "\ufeff" + csvLinhas.join("\r\n");  // BOM + conteúdo
 
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
@@ -292,4 +307,3 @@ btnExportar.onclick = () => {
 // ================= INICIALIZAÇÃO =================
 btnIniciarVoz.onclick = iniciarFluxoVoz;
 renderizar();
-

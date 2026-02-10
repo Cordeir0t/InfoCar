@@ -9,6 +9,7 @@ const lista = document.getElementById("lista");
 const btnSalvar = document.getElementById("salvar");
 const btnLimparForm = document.getElementById("limparForm");
 const btnIniciarVoz = document.getElementById("iniciarVoz");
+const btnExportar = document.getElementById("exportarExcel");
 
 const iconeRobo = document.getElementById("iconeRobo");
 const iconeMic = document.getElementById("iconeMic");
@@ -18,8 +19,7 @@ let etapaVoz = 0;
 let timeoutSilencio = null;
 
 // ================= VOZ =================
-const SpeechRecognition =
-  window.SpeechRecognition || window.webkitSpeechRecognition;
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
 if (!SpeechRecognition) {
   btnIniciarVoz.style.display = "none";
@@ -33,12 +33,15 @@ rec.continuous = false;
 
 const synth = window.speechSynthesis;
 
-// ================= MAPA DE REPAROS (para voz) =================
+// ================= MAPA DE REPAROS =================
 const mapaReparos = {
   "troca de óleo": "Troca de óleo",
+  "óleo": "Troca de óleo",
   "freio": "Freio",
+  "freios": "Freio",
   "suspensão": "Suspensão",
   "elétrica": "Elétrica",
+  "eletrica": "Elétrica",
   "motor": "Motor",
   "alinhamento": "Alinhamento e balanceamento",
   "balanceamento": "Alinhamento e balanceamento",
@@ -69,18 +72,19 @@ function falar(texto, callback) {
 
   const fala = new SpeechSynthesisUtterance(texto);
   fala.lang = "pt-BR";
+  fala.rate = 0.9;
 
   fala.onend = () => {
     setTimeout(() => {
       mostrarMic();
       if (callback) callback();
-    }, 100);
+    }, 200);
   };
 
   synth.speak(fala);
 }
 
-// ================= OUVIR CAMPO COMUM =================
+// ================= OUVIR CAMPO =================
 function ouvirCampo(campo, repetirPergunta, callbackSucesso) {
   rec.abort();
   rec.start();
@@ -88,11 +92,11 @@ function ouvirCampo(campo, repetirPergunta, callbackSucesso) {
   timeoutSilencio = setTimeout(() => {
     rec.abort();
     falar(repetirPergunta, () => ouvirCampo(campo, repetirPergunta, callbackSucesso));
-  }, 5000);
+  }, 6000);
 
   rec.onresult = (e) => {
     clearTimeout(timeoutSilencio);
-    const texto = e.results[0][0].transcript.toLowerCase();
+    const texto = e.results[0][0].transcript;
     campo.value = texto;
     rec.abort();
     if (callbackSucesso) callbackSucesso(texto);
@@ -100,23 +104,20 @@ function ouvirCampo(campo, repetirPergunta, callbackSucesso) {
   };
 }
 
-// ================= OUVIR SELECT REPARO =================
+// ================= OUVIR REPARO =================
 function ouvirReparo() {
   rec.abort();
   rec.start();
 
   timeoutSilencio = setTimeout(() => {
     rec.abort();
-    falar("Diga: óleo, freio, suspensão, elétrica, motor, alinhamento ou outro", 
-      ouvirReparo
-    );
-  }, 5000);
+    falar("Óleo, freio, suspensão, elétrica, motor, alinhamento ou outro?", ouvirReparo);
+  }, 6000);
 
   rec.onresult = (e) => {
     clearTimeout(timeoutSilencio);
     const texto = e.results[0][0].transcript.toLowerCase();
     
-    // Mapeia fala para opção do select
     for (let chave in mapaReparos) {
       if (texto.includes(chave)) {
         reparo.value = mapaReparos[chave];
@@ -126,70 +127,55 @@ function ouvirReparo() {
       }
     }
     
-    // Se não reconheceu, repete
-    falar("Não entendi. Diga óleo, freio, suspensão, elétrica, motor, alinhamento ou outro", 
-      ouvirReparo
-    );
+    falar("Não entendi. Óleo, freio, suspensão, elétrica, motor ou outro?", ouvirReparo);
   };
 }
 
 // ================= FLUXO VOZ =================
 function iniciarFluxoVoz() {
   etapaVoz = 0;
-  limparFormulario(); // Limpa antes de começar
-  proximaEtapa();
+  limparFormulario();
+  falar("Iniciando registro por voz...", proximaEtapa);
 }
 
 function proximaEtapa() {
-  console.log("Etapa voz:", etapaVoz); // Debug
-  
   if (etapaVoz === 0) {
-    falar("Olá! Informe o nome do responsável", () =>
-      ouvirCampo(nome, "Não ouvi. Qual o nome do responsável?")
+    falar("Qual o nome do responsável?", () =>
+      ouvirCampo(nome, "Nome do responsável?")
     );
     etapaVoz++;
-  }
-  else if (etapaVoz === 1) {
-    falar("Agora informe a placa do veículo", () =>
-      ouvirCampo(placa, "Não ouvi a placa. Repita a placa")
+  } else if (etapaVoz === 1) {
+    falar("Qual a placa do veículo?", () =>
+      ouvirCampo(placa, "Qual a placa?")
     );
     etapaVoz++;
-  }
-  else if (etapaVoz === 2) {
-    falar("Qual o tipo de reparo? Óleo, freio, suspensão, elétrica, motor, alinhamento ou outro?", 
+  } else if (etapaVoz === 2) {
+    falar("Tipo de reparo? Óleo, freio, suspensão, elétrica, motor, alinhamento ou outro?", 
       ouvirReparo
     );
     etapaVoz++;
-  }
-  else if (etapaVoz === 3) {
-    falar("Alguma observação importante?", () =>
-      ouvirCampo(obs, "Pode repetir as observações?")
+  } else if (etapaVoz === 3) {
+    falar("Alguma observação?", () =>
+      ouvirCampo(obs, "Observações?")
     );
     etapaVoz++;
-  }
-  else if (etapaVoz === 4) {
-    falar("Descreva o processo do reparo realizado", () =>
-      ouvirCampo(descricaoProcesso, "Descreva o processo do reparo")
+  } else if (etapaVoz === 4) {
+    falar("Descreva o processo realizado", () =>
+      ouvirCampo(descricaoProcesso, "Descreva o processo")
     );
     etapaVoz++;
-  }
-  else {
+  } else {
     esconderIcones();
-    falar("Perfeito! Salvando o registro...", () => {
+    falar("Salvando registro...", () => {
       btnSalvar.click();
-      falar("Registro salvo com sucesso!");
     });
-    etapaVoz = 0;
   }
 }
 
-// ================= EVENTOS =================
-btnIniciarVoz.onclick = iniciarFluxoVoz;
-
-// ================= SALVAR / ATUALIZAR =================
+// ================= SALVAR =================
 btnSalvar.onclick = () => {
   if (!nome.value?.trim() || !placa.value?.trim() || !reparo.value) {
-    alert("Preencha responsável, placa e tipo de reparo.");
+    alert("Preencha nome, placa e reparo!");
     return;
   }
 
@@ -197,20 +183,17 @@ btnSalvar.onclick = () => {
 
   if (editandoId) {
     dados = dados.map(r =>
-      r.id === editandoId
-        ? { 
-            ...r, 
-            nome: nome.value.trim(),
-            placa: placa.value.trim().toUpperCase(),
-            reparo: reparo.value,
-            obs: obs.value,
-            descricaoProcesso: descricaoProcesso.value
-          }
-        : r
+      r.id === editandoId ? {
+        ...r,
+        nome: nome.value.trim(),
+        placa: placa.value.trim().toUpperCase(),
+        reparo: reparo.value,
+        obs: obs.value,
+        descricaoProcesso: descricaoProcesso.value
+      } : r
     );
     editandoId = null;
     btnSalvar.textContent = "Salvar";
-    alert("Registro atualizado!");
   } else {
     dados.push({
       id: Date.now(),
@@ -228,10 +211,11 @@ btnSalvar.onclick = () => {
   renderizar();
 };
 
-// Resto do código permanece igual (renderizar, editar, excluir, limparFormulario, exportar)
+// ================= RENDER =================
 function renderizar() {
   lista.innerHTML = "";
   const dados = JSON.parse(localStorage.getItem("registros")) || [];
+  dados.reverse(); // Mais recentes primeiro
 
   dados.forEach(r => {
     const div = document.createElement("div");
@@ -239,8 +223,8 @@ function renderizar() {
     div.innerHTML = `
       <strong>${r.placa}</strong> — ${r.reparo}<br>
       <span style="color: #93c5fd;">${r.nome}</span><br>
-      ${r.obs ? `<small style="color: #94a3b8;">Obs: ${r.obs}</small><br>` : ''}
-      ${r.descricaoProcesso ? `<small style="color: #cbd5f5;"><strong>Processo:</strong> ${r.descricaoProcesso}</small>` : ''}<br>
+      ${r.obs ? `<small style="color: #94a3b8;">${r.obs}</small><br>` : ''}
+      ${r.descricaoProcesso ? `<small style="color: #cbd5f5;"><strong>Processo:</strong> ${r.descricaoProcesso}</small><br>` : ''}
       <small style="color: #64748b;">${r.data}</small><br>
       <button onclick="editar(${r.id})">Editar</button>
       <button onclick="excluir(${r.id})">Excluir</button>
@@ -249,6 +233,7 @@ function renderizar() {
   });
 }
 
+// ================= EDITAR/EXCLUIR =================
 function editar(id) {
   const dados = JSON.parse(localStorage.getItem("registros")) || [];
   const r = dados.find(item => item.id === id);
@@ -266,49 +251,45 @@ function editar(id) {
 }
 
 function excluir(id) {
-  if (!confirm("Deseja excluir este registro?")) return;
-
-  let dados = JSON.parse(localStorage.getItem("registros")) || [];
-  dados = dados.filter(r => r.id !== id);
-  localStorage.setItem("registros", JSON.stringify(dados));
-  renderizar();
+  if (confirm("Excluir este registro?")) {
+    let dados = JSON.parse(localStorage.getItem("registros")) || [];
+    dados = dados.filter(r => r.id !== id);
+    localStorage.setItem("registros", JSON.stringify(dados));
+    renderizar();
+  }
 }
 
+// ================= LIMPAR =================
 function limparFormulario() {
-  nome.value = "";
-  placa.value = "";
-  reparo.value = "";
-  obs.value = "";
-  descricaoProcesso.value = "";
+  nome.value = placa.value = reparo.value = obs.value = descricaoProcesso.value = "";
   editandoId = null;
   btnSalvar.textContent = "Salvar";
 }
 
-const btnExportar = document.getElementById("exportarExcel");
+btnLimparForm.onclick = limparFormulario;
+
+// ================= EXPORT CSV CORRIGIDO =================
 btnExportar.onclick = () => {
   const dados = JSON.parse(localStorage.getItem("registros")) || [];
+  if (!dados.length) return alert("Sem registros!");
 
-  if (dados.length === 0) {
-    alert("Não há registros para exportar.");
-    return;
-  }
-
-  let csv = "Responsável;Placa;Tipo de Reparo;Observações;Descrição do Processo;Data\n";
+  let csv = "\uFEFFResponsável;Placa;Tipo de Reparo;Observações;Descrição do Processo;Data\r\n";
 
   dados.forEach(r => {
-    csv += `"${r.nome.replace(/"/g, '""')}";"${r.placa}";"${r.reparo.replace(/"/g, '""')}";"${(r.obs || '').replace(/"/g, '""')}";"${(r.descricaoProcesso || '').replace(/"/g, '""')}";"${r.data}"\n`;
+    csv += `"${r.nome.replace(/"/g,'""')}";"${r.placa}";"${r.reparo.replace(/"/g,'""')}";"${(r.obs||'').replace(/"/g,'""')}";"${(r.descricaoProcesso||'').replace(/"/g,'""')}";"${r.data}"\r\n`;
   });
 
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
-
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `registros_manutencao_${new Date().toISOString().split('T')[0]}.csv`;
-  link.click();
-
+  const a = Object.assign(document.createElement("a"), {
+    href: url,
+    download: `registros_manutencao_${new Date().toISOString().slice(0,10)}.csv`
+  });
+  a.click();
   URL.revokeObjectURL(url);
 };
 
-// ================= INIT =================
+// ================= INICIALIZAÇÃO =================
+btnIniciarVoz.onclick = iniciarFluxoVoz;
 renderizar();
+

@@ -3,6 +3,7 @@ const nome = document.getElementById("nome");
 const placa = document.getElementById("placa");
 const reparo = document.getElementById("reparo");
 const obs = document.getElementById("observacoes");
+const descricaoProcesso = document.getElementById("descricaoProcesso"); // Novo campo
 const lista = document.getElementById("lista");
 
 const btnSalvar = document.getElementById("salvar");
@@ -21,7 +22,8 @@ const SpeechRecognition =
   window.SpeechRecognition || window.webkitSpeechRecognition;
 
 if (!SpeechRecognition) {
-  alert("Use Google Chrome ou Edge para usar o reconhecimento de voz.");
+  btnIniciarVoz.style.display = "none";
+  btnIniciarVoz.title = "Reconhecimento de voz não suportado";
 }
 
 const rec = new SpeechRecognition();
@@ -61,7 +63,7 @@ function falar(texto, callback) {
     setTimeout(() => {
       mostrarMic();
       if (callback) callback();
-    }, 100); // tempo visual entre robô e mic
+    }, 100);
   };
 
   synth.speak(fala);
@@ -87,7 +89,7 @@ function ouvirCampo(campo, repetirPergunta) {
   };
 }
 
-// ================= FLUXO =================
+// ================= FLUXO VOZ =================
 function iniciarFluxoVoz() {
   etapaVoz = 0;
   proximaEtapa();
@@ -100,29 +102,39 @@ function proximaEtapa() {
     );
     etapaVoz++;
   }
-
   else if (etapaVoz === 1) {
     falar("Informe a placa do veículo", () =>
       ouvirCampo(placa, "Não ouvi. Informe a placa do veículo")
     );
     etapaVoz++;
   }
-
   else if (etapaVoz === 2) {
-    falar("Deseja informar observações?", () =>
-      ouvirCampo(obs, "Pode informar as observações agora")
+    falar("Informe o tipo de reparo", () =>
+      ouvirCampo(reparo, "Informe o tipo de reparo")
     );
     etapaVoz++;
   }
-
+  else if (etapaVoz === 3) {
+    falar("Deseja informar observações?", () =>
+      ouvirCampo(obs, "Pode informar as observações")
+    );
+    etapaVoz++;
+  }
+  else if (etapaVoz === 4) {
+    falar("Descreva o processo realizado", () =>
+      ouvirCampo(descricaoProcesso, "Descreva o processo")
+    );
+    etapaVoz++;
+  }
   else {
     esconderIcones();
-    falar("Atendimento por voz finalizado.");
+    falar("Registro salvo com sucesso!");
     etapaVoz = 0;
+    btnSalvar.click(); // Auto-salva após voz
   }
 }
 
-// ================= BOTÃO INICIAR =================
+// ================= EVENTOS =================
 btnIniciarVoz.onclick = iniciarFluxoVoz;
 
 // ================= SALVAR / ATUALIZAR =================
@@ -137,7 +149,14 @@ btnSalvar.onclick = () => {
   if (editandoId) {
     dados = dados.map(r =>
       r.id === editandoId
-        ? { ...r, nome: nome.value, placa: placa.value, reparo: reparo.value, obs: obs.value }
+        ? { 
+            ...r, 
+            nome: nome.value, 
+            placa: placa.value, 
+            reparo: reparo.value, 
+            obs: obs.value,
+            descricaoProcesso: descricaoProcesso.value  // Novo campo
+          }
         : r
     );
     editandoId = null;
@@ -149,6 +168,7 @@ btnSalvar.onclick = () => {
       placa: placa.value,
       reparo: reparo.value,
       obs: obs.value,
+      descricaoProcesso: descricaoProcesso.value,  // Novo campo
       data: new Date().toLocaleString()
     });
   }
@@ -167,9 +187,11 @@ function renderizar() {
     const div = document.createElement("div");
     div.className = "item";
     div.innerHTML = `
-      <strong>${r.placa}</strong> — ${r.reparo}<br>
-      ${r.nome}<br>
-      <small>${r.data}</small><br><br>
+      <strong>${r.placa.toUpperCase()}</strong> — ${r.reparo}<br>
+      <span>${r.nome}</span><br>
+      ${r.obs ? `<small>${r.obs}</small><br>` : ''}
+      ${r.descricaoProcesso ? `<small><strong>Processo:</strong> ${r.descricaoProcesso}</small>` : ''}<br>
+      <small>Data: ${r.data}</small><br>
       <button onclick="editar(${r.id})">Editar</button>
       <button onclick="excluir(${r.id})">Excluir</button>
     `;
@@ -186,10 +208,12 @@ function editar(id) {
   nome.value = r.nome;
   placa.value = r.placa;
   reparo.value = r.reparo;
-  obs.value = r.obs;
+  obs.value = r.obs || '';
+  descricaoProcesso.value = r.descricaoProcesso || '';
 
   editandoId = id;
   btnSalvar.textContent = "Atualizar";
+  nome.focus();
 }
 
 // ================= EXCLUIR =================
@@ -210,6 +234,7 @@ function limparFormulario() {
   placa.value = "";
   reparo.value = "";
   obs.value = "";
+  descricaoProcesso.value = "";  // Limpar novo campo
   editandoId = null;
   btnSalvar.textContent = "Salvar";
 }
@@ -225,10 +250,10 @@ btnExportar.onclick = () => {
     return;
   }
 
-  let csv = "Responsável;Placa;Tipo de Reparo;Observações;Data\n";
+  let csv = "Responsável;Placa;Tipo de Reparo;Observações;Descrição do Processo;Data\n";
 
   dados.forEach(r => {
-    csv += `"${r.nome}";"${r.placa}";"${r.reparo}";"${r.obs}";"${r.data}"\n`;
+    csv += `"${r.nome.replace(/"/g, '""')}";"${r.placa}";"${r.reparo.replace(/"/g, '""')}";"${(r.obs || '').replace(/"/g, '""')}";"${(r.descricaoProcesso || '').replace(/"/g, '""')}";"${r.data}"\n`;
   });
 
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -236,7 +261,7 @@ btnExportar.onclick = () => {
 
   const link = document.createElement("a");
   link.href = url;
-  link.download = "registros_manutencao.csv";
+  link.download = `registros_manutencao_${new Date().toISOString().split('T')[0]}.csv`;
   link.click();
 
   URL.revokeObjectURL(url);
